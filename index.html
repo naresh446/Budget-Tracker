@@ -487,6 +487,30 @@ function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.
 
 // ── AUTH SYSTEM ──
 let currentUser=null;
+ window.onload = function () {
+  
+   const savedUser = localStorage.getItem('bt_current_user');
+
+   if(savedUser){
+
+      const users = getUsers();
+
+      currentUser = savedUser;
+
+      document.getElementById('auth-screen').style.display = 'none';
+
+      document.getElementById('main-app').style.display = 'block';
+
+      if(users[savedUser]){
+         document.getElementById('user-display').textContent =
+         users[savedUser].name.split(' ')[0];
+      }
+
+      loadUserData(savedUser);
+
+   }
+
+}
 function getUsers(){try{return JSON.parse(localStorage.getItem('bt_users')||'{}');}catch(e){return {};}}
 function saveUsers(u){localStorage.setItem('bt_users',JSON.stringify(u));}
 function hashPass(p){let h=0;for(let i=0;i<p.length;i++){h=(h<<5)-h+p.charCodeAt(i);h|=0;}return h.toString(36);}
@@ -510,8 +534,9 @@ function doSignup(){
   users[user]={name,hash:hashPass(pass)};
   saveUsers(users);
   ok.textContent='✅ Account created! Logging you in...';
-  setTimeout(()=>loginUser(user,name),900);
-}
+setTimeout(() => {
+   loginUser(user,name);
+}, 1000);
 function doLogin(){
   const user=document.getElementById('login-user').value.trim().toLowerCase();
   const pass=document.getElementById('login-pass').value;
@@ -523,22 +548,51 @@ function doLogin(){
   if(users[user].hash!==hashPass(pass)){err.textContent='Incorrect password. Try again.';return;}
   loginUser(user,users[user].name);
 }
+ window.onload = function () {
+   const savedUser = localStorage.getItem('bt_current_user');
+
+   if(savedUser){
+      loginUser(savedUser, savedUser);
+   }
+}
 function loginUser(username,name){
-  currentUser=username;
-  localStorage.setItem('bt_current_user',username);
+
+  currentUser = username;
+
+  localStorage.setItem('bt_current_user', username);
+
+  const initials = name.split(' ')
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0,2);
+
+  document.getElementById('user-avatar').textContent = initials;
+
+  document.getElementById('user-display').textContent =
+    name.split(' ')[0];
+
+  document.getElementById('auth-screen').style.display = 'none';
+
+  document.getElementById('main-app').style.display = 'flex';
+
   loadUserData(username);
-  const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('user-avatar').textContent=initials;
-  document.getElementById('user-display').textContent=name.split(' ')[0];
-  document.getElementById('auth-screen').style.display='none';
-  document.getElementById('main-app').style.display='flex';
+
   renderHome();
+
   renderCurrentBudget();
 }
+
 function doLogout(){
-  if(!confirm('Are you sure you want to logout?'))return;
-  currentUser=null;
+
+  if(!confirm('Are you sure you want to logout?')) return;
+
   localStorage.removeItem('bt_current_user');
+
+  currentUser = null;
+
+  location.reload();
+}
   expenses=[];emis=[];totalBudget=0;netIncome=0;
   document.getElementById('main-app').style.display='none';
   document.getElementById('auth-screen').style.display='block';
