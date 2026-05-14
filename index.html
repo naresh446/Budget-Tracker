@@ -728,7 +728,6 @@ function updateAllocTotal(){
   const el=document.getElementById('total-alloc-display');
   const warn=document.getElementById('budget-overshoot');
   if(el)el.textContent=fmtAmt(total);
-  const inc=parseFloat(document.getElementById('inp-income')?.value||netIncome||0);
   if(warn) warn.style.display=(inc>0&&total>inc)?'block':'none';
 }
 
@@ -976,26 +975,6 @@ function renderMonthly(){
           ?fmtAmt(Math.max(0,netIncome-totalBudget))
           :'—'}
       </span>
-}
-function saveIncomeAndBudget(){
-  const inc=parseFloat(document.getElementById('inp-income').value);
-  const msg=document.getElementById('budget-msg');
-  if(inc&&inc>0) netIncome=inc;
-  // read category budgets
-  let total=0;
-  CATS.forEach(c=>{
-    const v=parseFloat(document.getElementById('catbud-'+c)?.value||0);
-    catBudgets[c]=v>0?v:0;
-    total+=catBudgets[c];
-  });
-  totalBudget=total>0?total:(netIncome||0);
-  if(!inc&&total===0){msg.textContent='Please enter income or at least one category budget';msg.style.color='#c0392b';return;}
-  if(inc>0&&total>inc){msg.textContent='⚠️ Total budget exceeds income! Saved anyway.';msg.style.color='#f39c12';}
-  else{msg.textContent='✅ Budget saved successfully!';msg.style.color='#27ae60';}
-  save();
-  renderSettings();
-  renderHome();
-  setTimeout(()=>msg.textContent='',3000);
 }
 
 function calcEmi(){
