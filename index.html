@@ -918,41 +918,65 @@ function renderMonthly(){
     </div>`;
   }).join(''):'<div class="empty">No expenses recorded</div>';
 }
+  function renderSettings(){
+  const el=document.getElementById('current-settings');
+
   if(!el)return;
+
   const tots=catTotals(thisMonthExpenses());
+
   const catRows=CATS.map((c,i)=>{
+
     const bud=catBudgets[c]||0;
     const spent=tots[c]||0;
-    const pct=bud>0?Math.min(100,Math.round((spent/bud)*100)):0;
-    const over=bud>0&&spent>bud;
-    return bud>0?`
+
+    if(!bud)return '';
+
+    const pct=Math.min(100,Math.round((spent/bud)*100));
+
+    const over=spent>bud;
+
+    return `
       <div style="padding:6px 0;border-bottom:0.5px solid #eee;">
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
           <span>${CAT_ICONS[c]} ${c}</span>
-          <span style="color:${over?'#c0392b':'#333'};">${fmtAmt(spent)} / ${fmtAmt(bud)}</span>
+          <span style="color:${over?'#c0392b':'#333'};">
+            ${fmtAmt(spent)} / ${fmtAmt(bud)}
+          </span>
         </div>
+
         <div style="height:5px;background:#eee;border-radius:4px;overflow:hidden;">
           <div style="width:${pct}%;height:100%;background:${over?'#c0392b':CAT_COLORS[i]};border-radius:4px;"></div>
         </div>
-      </div>`:''}).join('');
+      </div>
+    `;
+
+  }).join('');
+
   el.innerHTML=`
+
     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #eee;font-size:14px;">
       <span style="color:#888;">Net Income</span>
-      <span style="font-weight:600;color:#185FA5;">${netIncome>0?fmtAmt(netIncome):'Not set'}</span>
+      <span style="font-weight:600;color:#185FA5;">
+        ${netIncome>0?fmtAmt(netIncome):'Not set'}
+      </span>
     </div>
+
     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #eee;font-size:14px;">
       <span style="color:#888;">Total Budget</span>
-      <span style="font-weight:600;">${totalBudget>0?fmtAmt(totalBudget):'Not set'}</span>
+      <span style="font-weight:600;">
+        ${totalBudget>0?fmtAmt(totalBudget):'Not set'}
+      </span>
     </div>
-    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:${catRows?'0.5px solid #eee':'none'};font-size:14px;">
-      <span style="color:#888;">Savings Target</span>
-      <span style="font-weight:600;color:#27ae60;">${netIncome>0&&totalBudget>0?fmtAmt(Math.max(0,netIncome-totalBudget)):'—'}</span>
-    </div>
-    ${catRows?`<div style="margin-top:6px;"><div style="font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">Category Budgets</div>${catRows}</div>`:''}`;
-  if(netIncome>0)document.getElementById('inp-income').value=netIncome;
-  renderCatBudgetInputs();
-}
 
+    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;">
+      <span style="color:#888;">Savings Target</span>
+      <span style="font-weight:600;color:#27ae60;">
+        ${netIncome>0&&totalBudget>0
+          ?fmtAmt(Math.max(0,netIncome-totalBudget))
+          :'—'}
+      </span>
+}
 function saveIncomeAndBudget(){
   const inc=parseFloat(document.getElementById('inp-income').value);
   const msg=document.getElementById('budget-msg');
